@@ -20,22 +20,32 @@ class App extends React.Component {
 		}
 
 		this.update = this.update.bind(this)
+		this.changeMsg = this.changeMsg.bind(this)
+		this.addLove = this.addLove.bind(this)
+	}
+	changeMsg(e) {
+		this.setState({
+			message: e.target.value
+		})
+	}
+	addLove(e) {
+		console.log('--- addLove() is called');
+		this.setState({
+			love: this.state.love + 1
+		})
 	}
 	update(e) {
 		this.setState({
-			message: e.target.value,
 			red: ReactDOM.findDOMNode(this.refs.red).value,
 			green: ReactDOM.findDOMNode(this.refs.green).value,
-			blue: ReactDOM.findDOMNode(this.refs.blue).value,
-			love: this.state.love + 1,
-			eob: 0
+			blue: ReactDOM.findDOMNode(this.refs.blue).value
 		})
 	}
 	render() {
 	    console.log('rendering')
         return <div>
 	        <h3>Props Text</h3>
-	        <TextInput txt="{this.state.message}" update={this.update} />
+	        <TextInput txt="{this.state.message}" update={this.changeMsg} />
 	        {this.state.message}
 
 	        <h3>Owner/Ownee Slider</h3>
@@ -47,19 +57,31 @@ class App extends React.Component {
 	        {this.state.blue}<br/>
 
 	        <h3>Child properties</h3>
-	        <Button update={this.update}>I <Heart/> React {this.state.love} times</Button> I heart React is children
+	        <Button update={this.addLove}>I <Heart/> React</Button> React is <Heart/> {this.state.love} times by machine and YOU
         </div>
     }
 
 	// some component lifecycle calls
 	componentWillMount() {
-		console.log('mounting')
+		console.log('mounting', ReactDOM.findDOMNode(this)); // don't know about this node yet, so it will be null
 	}
 	componentDidMount() {
-		console.log('mounted')
+		console.log('mounted', ReactDOM.findDOMNode(this));
+		this.increase = setInterval(this.addLove, 2000); // check the screen console for increasing rendering call
 	}
 	componentWillUnmount() {
-		console.log('will unmount')
+		console.log('will unmount', ReactDOM.findDOMNode(this));
+		clearInterval(this.increase); // clean up interval
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		let machineLoveNotReached = nextState.love < 4; // Limit machine love to 3 times only :)
+		if (!machineLoveNotReached) {
+			clearInterval(this.increase); // clean up interval
+		}
+		return machineLoveNotReached;
+	}
+	componentDidUpdate(prevProps, prevState) {
+		console.log('prevState', prevState);
 	}
 }
 
